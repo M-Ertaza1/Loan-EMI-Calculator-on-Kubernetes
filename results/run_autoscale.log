@@ -1,0 +1,4 @@
+deployment.apps/emi-web scaled
+deployment "emi-web" successfully rolled out
+horizontalpodautoscaler.autoscaling/emi-web created
+AUTOSCALE DONE

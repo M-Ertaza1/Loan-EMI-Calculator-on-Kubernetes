@@ -1,0 +1,33 @@
+NAME                           READY   STATUS      RESTARTS   AGE     IP            NODE       NOMINATED NODE   READINESS GATES
+pod/emi-web-67d669c48d-5r8rx   1/1     Running     0          3m42s   10.244.0.14   minikube   <none>           <none>
+pod/emi-web-67d669c48d-bgfhg   1/1     Running     0          3m42s   10.244.0.15   minikube   <none>           <none>
+pod/emi-web-67d669c48d-lszq7   1/1     Running     0          3m42s   10.244.0.16   minikube   <none>           <none>
+pod/mongo-0                    1/1     Running     0          8m10s   10.244.0.10   minikube   <none>           <none>
+pod/mongo-1                    1/1     Running     0          8m8s    10.244.0.11   minikube   <none>           <none>
+pod/mongo-2                    1/1     Running     0          8m6s    10.244.0.12   minikube   <none>           <none>
+pod/mongo-init-b2s8n           0/1     Completed   0          4m3s    10.244.0.13   minikube   <none>           <none>
+
+NAME              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)     AGE     SELECTOR
+service/emi-web   ClusterIP   10.107.136.164   <none>        80/TCP      3m42s   app=emi-web
+service/mongo     ClusterIP   None             <none>        27017/TCP   8m10s   app=mongo
+
+NAME                      READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES        SELECTOR
+deployment.apps/emi-web   3/3     3            3           3m42s   web          emi-web:1.0   app=emi-web
+
+NAME                                 DESIRED   CURRENT   READY   AGE     CONTAINERS   IMAGES        SELECTOR
+replicaset.apps/emi-web-67d669c48d   3         3         3       3m42s   web          emi-web:1.0   app=emi-web,pod-template-hash=67d669c48d
+
+NAME                     READY   AGE     CONTAINERS   IMAGES
+statefulset.apps/mongo   3/3     8m10s   mongo        mongo:7
+
+NAME                   STATUS     COMPLETIONS   DURATION   AGE    CONTAINERS   IMAGES    SELECTOR
+job.batch/mongo-init   Complete   1/1           16s        4m3s   init         mongo:7   batch.kubernetes.io/controller-uid=15af4b23-0732-4f6e-8ced-c441eb932d65
+
+NAME                                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE     VOLUMEMODE
+persistentvolumeclaim/data-mongo-0   Bound    pvc-c09eac11-52ec-4e01-b562-0c3d5a31b101   1Gi        RWO            standard       <unset>                 8m10s   Filesystem
+persistentvolumeclaim/data-mongo-1   Bound    pvc-86c76d23-31df-4ef4-a4c6-429bd6d7998d   1Gi        RWO            standard       <unset>                 8m8s    Filesystem
+persistentvolumeclaim/data-mongo-2   Bound    pvc-4f6e01ac-a93c-42de-aeb9-8cef02ba464c   1Gi        RWO            standard       <unset>                 8m6s    Filesystem
+
+NAME                         DATA   AGE
+configmap/emi-config         1      4m3s
+configmap/kube-root-ca.crt   1      5h45m

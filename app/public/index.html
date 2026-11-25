@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Loan EMI Calculator v1.1</title>
+  <link href="/vendor/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-5" style="max-width: 820px;">
+  <h2 class="mb-4">Loan EMI Calculator <small class="text-muted fs-6">v1.1</small></h2>
+
+  <form id="emiForm" class="card card-body mb-4" novalidate>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Loan amount (P)</label>
+        <input type="number" class="form-control" id="principal" value="500000" step="any">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Annual interest rate (%)</label>
+        <input type="number" class="form-control" id="rate" value="12" step="any">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Tenure (months)</label>
+        <input type="number" class="form-control" id="months" value="24" step="1">
+      </div>
+    </div>
+    <div id="err" class="text-danger mt-3"></div>
+    <button type="submit" class="btn btn-primary mt-3">Calculate</button>
+  </form>
+
+  <div id="result" class="card card-body mb-4 d-none">
+    <h5>Result</h5>
+    <p class="mb-1">Monthly EMI: <b id="rEmi"></b></p>
+    <p class="mb-1">Total payment: <b id="rTotal"></b></p>
+    <p class="mb-1">Total interest: <b id="rInt"></b></p>
+    <p class="mb-0 text-muted small">Served by pod <b id="rPod"></b> (<span id="rIp"></span>)</p>
+  </div>
+
+  <h5>Last 10 calculations</h5>
+  <table class="table table-sm table-striped bg-white">
+    <thead><tr><th>Time</th><th>Principal</th><th>Rate %</th><th>Months</th><th>EMI</th><th>Pod</th></tr></thead>
+    <tbody id="history"></tbody>
+  </table>
+</div>
+
+<script src="/vendor/jquery.min.js"></script>
+<script>
+  const fmt = v => Number(v).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  function loadHistory() {
+    $.getJSON('/api/history', function (rows) {
+      const $b = $('#history').empty();
+      rows.forEach(r => {
+        $b.append($('<tr>')
+          .append($('<td>').text(new Date(r.createdAt).toLocaleString()))
+          .append($('<td>').text(fmt(r.principal)))
+          .append($('<td>').text(r.rate))
+          .append($('<td>').text(r.months))
+          .append($('<td>').text(fmt(r.emi)))
+          .append($('<td>').text(r.servedBy)));
+      });
+    });
+  }
+
+  $('#emiForm').on('submit', function (e) {
+    e.preventDefault();                                   // no postback
+    const P = parseFloat($('#principal').val());
+    const rate = parseFloat($('#rate').val());
+    const n = parseInt($('#months').val(), 10);
+    if (!(P > 0 && rate > 0 && n > 0)) {                  // client-side validation
+      $('#err').text('Please enter positive numbers in all fields.');
+      return;
+    }
+    $('#err').text('');
+    $.ajax({
+      url: '/api/emi', method: 'POST', contentType: 'application/json',
+      data: JSON.stringify({ principal: P, rate: rate, months: n }),
+      success: function (d) {
+        $('#rEmi').text(fmt(d.emi));
+        $('#rTotal').text(fmt(d.totalPayment));
+        $('#rInt').text(fmt(d.totalInterest));
+        $('#rPod').text(d.servedBy);
+        $('#rIp').text(d.podIp);
+        $('#result').removeClass('d-none');
+        loadHistory();
+      },
+      error: function (xhr) {
+        $('#err').text((xhr.responseJSON && xhr.responseJSON.error) || 'Request failed');
+      }
+    });
+  });
+
+  loadHistory();
+</script>
+</body>
+</html>
+
